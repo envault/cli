@@ -1,22 +1,23 @@
 {
   "name": "envault",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/envault/cli.git"
   },
   "author": "Envault",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/envault/cli/issues"
   },
   "homepage": "https://github.com/envault/cli#readme",
+  "bin": {
+    "envault": "index.js"
+  },
   "dependencies": {
     "axios": "^0.19.2",
+    "chalk": "^4.0.0",
     "dotenv": "^8.2.0"
   }
 }
