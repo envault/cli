@@ -14,5 +14,9 @@
   "bugs": {
     "url": "https://github.com/envault/cli/issues"
   },
-  "homepage": "https://github.com/envault/cli#readme"
+  "homepage": "https://github.com/envault/cli#readme",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "dotenv": "^8.2.0"
+  }
 }
