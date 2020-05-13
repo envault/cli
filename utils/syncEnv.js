@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 const fs = require('fs');
+const newLine = console.log;
 const print = console.log;
 
 module.exports = (variables, environment) => {

@@ -18,10 +18,11 @@ module.exports = () => {
 			syncEnv(response.data.variables, require('dotenv').config().parsed);
 
 			newLine();
-			print(chalk.bgGreen.bold('All done! 🎉'));
+			print(chalk.green.bold('All done! 🎉'));
 		})
 		.catch((error) => {
 			newLine();
 			print(chalk.bgRed.bold('Uh oh! There is an error with your Envault configuration, please set it up again!'));
+			print(chalk.red(error));
 		});
 };

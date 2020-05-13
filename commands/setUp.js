@@ -1,3 +1,4 @@
+const addConfigToGitignore = require('../utils/addConfigToGitignore');
 const axios = require('axios').default;
 const chalk = require('chalk');
 const fs = require('fs');
@@ -27,11 +28,12 @@ module.exports = () => {
 				syncEnv(response.data.app.variables, require('dotenv').config().parsed);
 
 				newLine();
-				print(chalk.bgGreen.bold('All done! 🎉'));
+				print(chalk.green.bold('All done! 🎉'));
 			}
 		})
 		.catch((error) => {
 			newLine();
 			print(chalk.bgRed.bold('Uh oh! Looks like your setup token is invalid, please get another!'));
+			print(chalk.red(error));
 		});
 };
