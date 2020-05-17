@@ -26,12 +26,8 @@ Envault has a [comprehensive documentation](https://docs.envault.dev) available 
 
 ## Support
 
-If you spot a bug with the Envault CLI, please [submit a detailed issue](https://github.com/envault/cli/issues) and a member of our team will assist you.
+If you spot a bug with Envault, please [submit a detailed issue](https://github.com/envault/envault/issues) and a member of our team will assist you.
 
 If you would like support, please log into the [Envault Portal](https://portal.envault.dev), where you can access live chat with our team. Alternatively, you can email [support@envault.dev](mailto:support@envault.dev) and we'll get right back to you.
 
 If you discover a security vulnerability within Envault, please email Dan Harrin via [dan@envault.dev](mailto:dan@envault.dev). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Envault CLI has been released under [the MIT License](https://github.com/envault/cli/blob/master/LICENSE.md).
