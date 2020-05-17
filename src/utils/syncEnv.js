@@ -6,15 +6,20 @@ const print = console.log;
 module.exports = (variables, environment) => {
 	let updates = [];
 
+	// Update .env file with new credentials
 	variables.forEach((variable) => {
 		if (variable.key in environment) {
+			// This variable is present in the .env file
 			if (environment[variable.key] != variable.latest_version.value) {
+				// This variable needs updating
 				let value = variable.latest_version.value;
 
-				if ((value.includes(' ') || (value.startsWith('${') && value.endsWith('}'))) && !(value.startsWith('"') && value.endsWith('"'))) {
+				// Wrap value in "" if it meets criteria
+				if ((value.includes(' ') || (value.startsWith('${') && value.endsWith('}'))) && ! (value.startsWith('"') && value.endsWith('"'))) {
 					value = `"${value}"`;
 				};
 
+				// Write updated value to .env
 				let contents = fs.readFileSync('.env').toString();
 
 				let expression = new RegExp('^' + variable.key + '=.*', 'gm');
@@ -29,7 +34,9 @@ module.exports = (variables, environment) => {
 		};
 	});
 
-    newLine();
+	// Report updates
+	newLine();
+
 	if (updates.length) {
 		print(chalk.green.bold(`We updated ${updates.length} ${updates.length > 1 ? 'variables' : 'variable'}:`));
 	} else {

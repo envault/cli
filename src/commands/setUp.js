@@ -7,13 +7,16 @@ const print = console.log;
 const syncEnv = require('../utils/syncEnv');
 
 module.exports = () => {
+	// Get setup configuration from command arguments
     const domain = process.argv[2];
 	const appId = process.argv[3];
 	const token = process.argv[4];
 
+	// Make a setup call to the Envault Server API
 	axios.post(`https://${domain}/api/v1/apps/${appId}/setup/${token}`)
 		.then((response) => {
 			if (response.data.authToken) {
+				// Create configuration file
 				fs.writeFileSync('.envault.json', JSON.stringify({
 					appId: appId,
 					authToken: response.data.authToken,

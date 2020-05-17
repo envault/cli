@@ -4,10 +4,11 @@ const newLine = console.log;
 const print = console.log;
 
 module.exports = () => {
+    // If .gitignore exists, make sure that the configuration file is listed in it
     if (fs.existsSync('.gitignore')) {
         const contents = fs.readFileSync('.gitignore').toString();
 
-        if (!contents.includes('.envault.json')) {
+        if (! contents.includes('.envault.json')) {
             fs.appendFileSync('.gitignore', '\n.envault.json');
 
             newLine();
