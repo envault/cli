@@ -1,7 +1,7 @@
 {
   "name": "envault",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "1.1.0",
+  "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/envault/cli.git"
@@ -13,11 +13,12 @@
   },
   "homepage": "https://github.com/envault/cli#readme",
   "bin": {
-    "envault": "index.js"
+    "envault": "src/index.js"
   },
   "dependencies": {
     "axios": "^0.19.2",
     "chalk": "^4.0.0",
     "dotenv": "^8.2.0"
-  }
+  },
+  "devDependencies": {}
 }
