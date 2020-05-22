@@ -1,6 +1,7 @@
 const chalk = require('chalk');
 const fs = require('fs');
 const newLine = console.log;
+const parseValue = require('./parseValue');
 const print = console.log;
 
 module.exports = (variables, environment) => {
@@ -10,14 +11,9 @@ module.exports = (variables, environment) => {
 	variables.forEach((variable) => {
 		if (variable.key in environment) {
 			// This variable is present in the .env file
-			if (environment[variable.key] != variable.latest_version.value) {
+			if (environment[variable.key] != parseValue(variable.latest_version.value)) {
 				// This variable needs updating
 				let value = variable.latest_version.value;
-
-				// Wrap value in "" if it meets criteria
-				if ((value.includes(' ') || (value.startsWith('${') && value.endsWith('}'))) && ! (value.startsWith('"') && value.endsWith('"'))) {
-					value = `"${value}"`;
-				};
 
 				// Write updated value to .env
 				let contents = fs.readFileSync('.env').toString();
