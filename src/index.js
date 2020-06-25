@@ -13,12 +13,6 @@ newLine();
 print(chalk.magenta.bold.underline('Welcome to Envault!'));
 print('No more .env update nightmares from now on, we promise 🤗');
 
-// If the .env file does not exist, throw error
-if (! fs.existsSync('.env')) {
-	newLine();
-	return print(chalk.bgRed.bold('.env file does not exist.'));
-};
-
 newLine();
 print('Preparing a few things...');
 

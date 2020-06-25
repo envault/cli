@@ -28,6 +28,17 @@ module.exports = () => {
 
 				addConfigToGitignore();
 
+				// If the .env file does not exist, create one and populate
+				if (! fs.existsSync('.env')) {
+					let template = '';
+
+					response.data.app.variables.forEach((variable) => {
+						template += `${variable.key}=\n`;
+					});
+
+					fs.writeFileSync('.env', template);
+				};
+
 				syncEnv(response.data.app.variables, require('dotenv').config().parsed);
 
 				newLine();
