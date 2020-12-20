@@ -15,35 +15,35 @@ module.exports = () => {
 	// Make a setup call to the Envault Server API
 	axios.post(`https://${domain}/api/v1/apps/${appId}/setup/${token}`)
 		.then((response) => {
-			if (response.data.authToken) {
-				// Create configuration file
-				fs.writeFileSync('.envault.json', JSON.stringify({
-					appId: appId,
-					authToken: response.data.authToken,
-					domain: domain,
-				}));
+			if (! response.data.authToken) return;
 
-				newLine();
-				print(chalk.green.bold('Configuration file set up.'));
+			// Create configuration file
+			fs.writeFileSync('.envault.json', JSON.stringify({
+				appId: appId,
+				authToken: response.data.authToken,
+				domain: domain,
+			}));
 
-				addConfigToGitignore();
+			newLine();
+			print(chalk.green.bold('Configuration file set up.'));
 
-				// If the .env file does not exist, create one and populate
-				if (! fs.existsSync('.env')) {
-					let template = '';
+			addConfigToGitignore();
 
-					response.data.app.variables.forEach((variable) => {
-						template += `${variable.key}=\n`;
-					});
+			// If the .env file does not exist, create one and populate
+			if (! fs.existsSync('.env')) {
+				let template = '';
 
-					fs.writeFileSync('.env', template);
-				};
+				response.data.app.variables.forEach((variable) => {
+					template += `${variable.key}=\n`;
+				});
 
-				syncEnv(response.data.app.variables, require('dotenv').config().parsed);
+				fs.writeFileSync('.env', template);
+			};
 
-				newLine();
-				print(chalk.green.bold('All done! 🎉'));
-			}
+			syncEnv(response.data.app.variables, require('dotenv').config().parsed);
+
+			newLine();
+			print(chalk.green.bold('All done! 🎉'));
 		})
 		.catch((error) => {
 			newLine();

@@ -7,14 +7,10 @@ const syncEnv = require('../utils/syncEnv');
 
 module.exports = () => {
 	// If the .env file does not exist, throw error
-	if (! fs.existsSync('.env')) {
-		return print(chalk.bgRed.bold('.env file does not exist.'));
-	};
+	if (! fs.existsSync('.env')) return print(chalk.bgRed.bold('.env file does not exist.'));
 
 	// If the configuration file does not exist, throw error
-    if (! fs.existsSync('.envault.json')) {
-		return print(chalk.bgRed.bold('Please set Envault up before trying to sync with it.'));
-	}
+    if (! fs.existsSync('.envault.json')) return print(chalk.bgRed.bold('Please set Envault up before trying to sync with it.'));
 
 	// Parse configuration from the file
 	const config = JSON.parse(fs.readFileSync('.envault.json'));

@@ -9,35 +9,31 @@ module.exports = (variables, environment) => {
 
 	// Update .env file with new credentials
 	variables.forEach((variable) => {
-		if (variable.key in environment) {
-			// This variable is present in the .env file
-			if (environment[variable.key] != parseValue(variable.latest_version.value)) {
-				// This variable needs updating
-				let value = variable.latest_version.value;
+		// Ensure that the variable is present in the .env file
+		if (! variable.key in environment) return;
 
-				// Write updated value to .env
-				let contents = fs.readFileSync('.env').toString();
+		// Ensure that the variable needs updating
+		if (! environment[variable.key] != parseValue(variable.latest_version.value)) return;
 
-				let expression = new RegExp('^' + variable.key + '=.*', 'gm');
+		let value = variable.latest_version.value;
 
-				if (contents.match(expression)) {
-					contents = contents.replace(expression, `${variable.key}=${value}`);
-					updates.push(variable);
-				};
+		// Write updated value to .env
+		let contents = fs.readFileSync('.env').toString();
 
-				fs.writeFileSync('.env', contents);
-			};
+		let expression = new RegExp('^' + variable.key + '=.*', 'gm');
+
+		if (contents.match(expression)) {
+			contents = contents.replace(expression, `${variable.key}=${value}`);
+			updates.push(variable);
 		};
+
+		fs.writeFileSync('.env', contents);
 	});
 
 	// Report updates
 	newLine();
 
-	if (updates.length) {
-		print(chalk.green.bold(`We updated ${updates.length} ${updates.length > 1 ? 'variables' : 'variable'}:`));
-	} else {
-		print(chalk.green.bold('Your .env is up to date!'));
-	}
+	print(chalk.green.bold(updates.length ? `We updated ${updates.length} ${updates.length > 1 ? 'variables' : 'variable'}:` : 'Your .env is up to date!'));
 
 	updates.forEach((variable) => {
 		print(chalk.green(`- ${variable.key} to v${variable.latest_version.id}`));
