@@ -22,6 +22,6 @@ npx envault
 
 ## Support
 
-If you spot a bug with Envault, please [submit a detailed issue](https://github.com/envault/cli/issues), and a member of our team, or the community, will assist you.
+If you spot a bug with Envault, please [submit a detailed issue](https://github.com/envault/envault/issues), and a member of our team, or the community, will assist you.
 
 If you discover a security vulnerability within Envault, please email Dan Harrin via [dan@envault.dev](mailto:dan@envault.dev). All security vulnerabilities will be promptly addressed.
