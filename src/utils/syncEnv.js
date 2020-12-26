@@ -13,7 +13,7 @@ module.exports = (variables, environment) => {
 		if (! variable.key in environment) return;
 
 		// Ensure that the variable needs updating
-		if (! environment[variable.key] != parseValue(variable.latest_version.value)) return;
+		if (environment[variable.key] === parseValue(variable.latest_version.value)) return;
 
 		let value = variable.latest_version.value;
 
