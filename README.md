@@ -20,8 +20,10 @@ After you've run your app setup command for the first time, you can sync your .e
 npx envault
 ```
 
-## Support
+## Need Help?
 
-If you spot a bug with Envault, please [submit a detailed issue](https://github.com/envault/envault/issues), and a member of our team, or the community, will assist you.
+🐞 If you spot a bug with Envault, please [submit a detailed issue](https://github.com/envault/envault/issues/new), and wait for assistance.
 
-If you discover a security vulnerability within Envault, please email Dan Harrin via [dan@envault.dev](mailto:dan@envault.dev). All security vulnerabilities will be promptly addressed.
+🤔 If you have a question or feature request, please [start a new discussion](https://github.com/envault/envault/discussions/new).
+
+🔐 If you discover a vulnerability within Envault, please review our [security policy](https://github.com/envault/cli/blob/master/SECURITY.md).
