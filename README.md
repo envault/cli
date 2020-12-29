@@ -1,6 +1,6 @@
 # Envault CLI
 
-[Envault](https://github.com/envault/envault) is a repository for your credentials. It lets you manage and sync your entire team’s local .env variables, so you’re all kept up to date. Simply install your Envault server and you're ready to sync. 🚀
+[Envault](https://github.com/envault/envault) is a repository for your .env secrets. It lets you manage and sync your entire team’s local .env variables across all your projects, so you’re all kept up to date with the latest changes. Simply install your Envault server and you're ready to sync. 🚀
 
 The Envault CLI allows you to connect to your Envault server and sync its credentials to your local .env file.
 
