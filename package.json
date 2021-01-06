@@ -1,19 +1,53 @@
 {
-  "name": "envault",
-  "version": "2.1.0",
-  "main": "src/index.js",
-  "author": "Envault",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/envault/envault/issues"
-  },
-  "homepage": "https://github.com/envault/envault",
-  "bin": {
-    "envault": "src/index.js"
-  },
-  "dependencies": {
-    "axios": "^0.21.1",
-    "chalk": "^4.1.0",
-    "dotenv": "^8.2.0"
-  }
+    "name": "envault",
+    "description": "Sync your .env file with Envault.",
+    "version": "2.2.0",
+    "author": "Envault",
+    "bin": {
+        "envault": "./bin/run"
+    },
+    "bugs": "https://github.com/envault/cli/issues",
+    "dependencies": {
+        "@oclif/command": "^1.8.0",
+        "@oclif/config": "^1.17.0",
+        "@oclif/plugin-help": "^3.2.1",
+        "axios": "^0.21.1",
+        "cli-ux": "^5.5.1",
+        "dotenv": "^8.2.0",
+        "tslib": "^1.14.1"
+    },
+    "devDependencies": {
+        "@oclif/dev-cli": "^1.26.0",
+        "@oclif/test": "^1.2.8",
+        "@types/chai": "^4.2.14",
+        "@types/mocha": "^5.2.7",
+        "@types/node": "^10.17.50",
+        "chai": "^4.2.0",
+        "mocha": "^5.2.0",
+        "nyc": "^14.1.1",
+        "ts-node": "^8.10.2",
+        "typescript": "^3.9.7"
+    },
+    "engines": {
+        "node": ">=8.0.0"
+    },
+    "files": [
+        "/bin",
+        "/lib"
+    ],
+    "homepage": "https://github.com/envault/cli",
+    "keywords": [
+        "oclif"
+    ],
+    "license": "MIT",
+    "main": "lib/index.js",
+    "oclif": {
+        "bin": "envault"
+    },
+    "repository": "envault/cli",
+    "scripts": {
+        "prepack": "rm -rf lib && tsc -b",
+        "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\""
+    },
+    "types": "lib/index.d.ts"
 }
