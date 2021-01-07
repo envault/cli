@@ -1,24 +1,31 @@
-const fs = require('fs')
+const fs = require('fs').promises
 
-export function addConfigToGitignore() {
-    // If .gitignore exists, make sure that the configuration file is listed in it
-    if (! fs.existsSync('.gitignore')) return false
+export async function addConfigToGitignore() {
+    let contents
 
-    const contents = fs.readFileSync('.gitignore').toString()
+    try {
+        contents = (await fs.readFile('.gitignore')).toString()
+    } catch (error) {
+        return false
+    }
 
     if (contents.includes('.envault.json')) return false
 
-    fs.appendFileSync('.gitignore', '\n.envault.json')
+    await fs.appendFile('.gitignore', '\n.envault.json')
 
     return true
 }
 
-export function getConfig() {
-    if (! fs.existsSync('.envault.json')) return false
+export async function getConfig() {
+    let config
 
-    let config = JSON.parse(fs.readFileSync('.envault.json'))
+    try {
+        config = (await fs.readFile('.envault.json')).toJSON()
+    } catch (error) {
+        return false
+    }
 
-    let fixed = false;
+    let fixed = false
 
     if ('appId' in config) {
         config.environment = config.appId
@@ -35,7 +42,7 @@ export function getConfig() {
     }
 
     if (fixed) {
-        writeConfig(config)
+        await writeConfig(config)
     }
 
     return config
@@ -61,42 +68,8 @@ export function parseValue(value = '') {
     return value
 }
 
-export function syncEnv(variables, environment) {
-    let updates = []
-
-    // Update .env file with new credentials
-    variables.forEach((variable) => {
-        // Ensure that the variable is present in the .env file
-        if (! variable.key in environment) return
-
-        // Ensure that the variable needs updating
-        if (environment[variable.key] === parseValue(variable.latest_version.value)) return
-
-        let value = variable.latest_version.value
-
-        // Write updated value to .env
-        let contents = fs.readFileSync('.env').toString()
-
-        let expression = new RegExp('^' + variable.key + '=.*', 'gm')
-
-        if (contents.match(expression)) {
-            contents = contents.replace(expression, `${variable.key}=${value}`)
-            updates.push(variable)
-        }
-
-        fs.writeFileSync('.env', contents)
-    })
-
-    // Report updates
-    print(chalk.green.bold(updates.length ? `We updated ${updates.length} ${updates.length > 1 ? 'variables' : 'variable'}:` : 'Your .env is up to date!'))
-
-    updates.forEach((variable) => {
-        print(chalk.green(`- ${variable.key} to v${variable.latest_version.id}`))
-    })
-}
-
-export function writeConfig(contents: object) {
-    fs.writeFileSync('.envault.json', JSON.stringify(contents))
+export async function writeConfig(contents: object) {
+    await fs.writeFile('.envault.json', JSON.stringify(contents))
 
     return contents
 }

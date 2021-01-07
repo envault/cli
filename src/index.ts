@@ -1,20 +1,30 @@
-const axios = require('axios').default
-import cli from "cli-ux";
 import {Command, flags} from '@oclif/command'
-const fs = require('fs')
-import {addConfigToGitignore, getConfig, parseValue, writeConfig} from './utils';
+const axios = require('axios').default
+import cli from 'cli-ux'
+const fs = require('fs').promises
+const path = require('path')
+const process = require('process')
+import {addConfigToGitignore, getConfig, parseValue, writeConfig} from './utils'
+
+interface Variable {
+    key: string
+    latest_version: {
+        id: bigint
+        value: string
+    }
+}
 
 class Envault extends Command {
     static description = 'Sync your .env file with Envault.'
 
     static flags = {
+        filename: flags.string({
+            char: 'f',
+            default: '.env',
+            description: 'name of .env file'
+        }),
         // force: flags.boolean({char: 'f'}),
         help: flags.help({char: 'h'}),
-        // path: flags.string({
-        //     char: 'p',
-        //     default: '.env',
-        //     description: 'path to .env file'
-        // }),
         // update: flags.boolean({
         //     char: 'u',
         //     description: 'update Envault from the local .env'
@@ -40,19 +50,23 @@ class Envault extends Command {
     async run() {
         const {args, flags} = this.parse(Envault)
 
+        let filename = flags.filename
+
         this.log('Welcome to Envault! No more .env update nightmares from now on, we promise 🤗')
 
         if (args.server && args.environment && args.token) {
-            cli.action.start('Contacting your Envault server')
+            let environment = args.environment
+            let server = args.server
+            let token = args.token
 
-            let response;
+            cli.action.start('Connecting to your Envault server')
+
+            let response
 
             try {
-                // Make a setup call to the Envault Server API
-                response = await axios.post(`https://${domain}/api/v1/apps/${appId}/setup/${token}`);
+                response = await axios.post(`https://${server}/api/v1/apps/${environment}/setup/${token}`)
             } catch (error) {
-                this.error('Uh oh! Looks like your setup token is invalid, please get another!')
-                this.error(error)
+                this.error('Looks like your setup token is invalid, please get another!')
 
                 return
             }
@@ -61,30 +75,74 @@ class Envault extends Command {
 
             if (! response.data.authToken) return
 
-            writeConfig({
+            const variables: Array<Variable> = response.data.app.variables
+
+            try {
+                await fs.readFile(filename)
+            } catch (error) {
+                if (! await cli.confirm(`A ${filename} file was not found. Would you like to create a new one? Y/n`)) return this.error(`Initialization aborted as a ${filename} file was not found.`)
+
+                let template = ''
+
+                for (const variable of variables) {
+                    template += `${variable.key}=\n`
+                }
+
+                await fs.writeFile(filename, template)
+            }
+
+            await writeConfig({
                 authToken: response.data.authToken,
-                environment: args.environment,
-                server: args.server,
+                environment: environment,
+                filename: filename,
+                server: server,
             })
 
             this.log('Configuration file set up.')
 
-            if (addConfigToGitignore()) this.log('.gitignore updated.')
+            if (await addConfigToGitignore()) this.log('.gitignore updated.')
 
-            // If the .env file does not exist, create one and populate
-            if (! fs.existsSync('.env')) {
-                let template = ''
+            const localVariables = require('dotenv').config({ path: path.resolve(process.cwd(), filename) }).parsed
 
-                response.data.app.variables.forEach((variable: object) => {
-                    template += `${variable.key}=\n`
-                })
+            let updates: Array<Variable> = []
 
-                fs.writeFileSync('.env', template)
+            let contents = (await fs.readFile(filename)).toString()
+
+            for (const variable of variables) {
+                if (! (variable.key in localVariables) && ! await cli.confirm(`The ${variable.key} variable is not currently present in your ${filename} file. Would you like to add it? Y/n`)) continue
+
+                if (localVariables[variable.key] === parseValue(variable.latest_version.value)) continue
+
+                let expression = new RegExp('^' + variable.key + '=.*', 'gm')
+
+                contents = contents.replace(expression, `${variable.key}=${variable.latest_version.value}`)
+
+                if (! contents.match(expression)) {
+                    contents += `\n${variable.key}=${variable.latest_version.value}\n`
+                }
+
+                updates.push(variable)
             }
 
-            // syncEnv(response.data.app.variables, require('dotenv').config().parsed)
+            await fs.writeFile(filename, contents)
 
-            this.log('All done! 🎉')
+            if (updates.length) {
+                this.log(`We updated ${updates.length} ${updates.length > 1 ? 'variables' : 'variable'}:`)
+
+                let updatesTree = cli.tree()
+
+                for (const variable of updates) {
+                    updatesTree.insert(`${variable.key} to v${variable.latest_version.id}`)
+                }
+
+                updatesTree.display()
+
+                return
+            }
+
+            this.log('You are already up to date 🎉')
+
+            return
         }
 
         // pull
