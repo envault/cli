@@ -44,7 +44,7 @@
     "oclif": {
         "bin": "envault"
     },
-    "repository": "envault/cli",
+    "repository": "https://github.com/envault/cli.git",
     "scripts": {
         "prepack": "rm -rf lib && tsc -b",
         "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\""
