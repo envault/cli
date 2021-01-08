@@ -20,12 +20,10 @@ class Envault extends Command {
     static flags = {
         constructive: flags.boolean({
             char: 'c',
-            description: 'constructive mode: creates missing files and variables without prompt',
+            description: 'enable prompts to create missing variables',
         }),
-        filename: flags.string({
-            char: 'f',
-            description: 'name of .env file',
-        }),
+        filename: flags.string({description: 'name of .env file'}),
+        force: flags.boolean({description: 'accept all prompts'}),
         help: flags.help({char: 'h'}),
         // update: flags.boolean({
         //     char: 'u',
@@ -81,7 +79,7 @@ class Envault extends Command {
             try {
                 await fs.readFile(filename)
             } catch (error) {
-                if (! flags.constructive && ! await cli.confirm(`A ${filename} file was not found. Would you like to create a new one? Y/n`)) return this.error(`Initialization aborted as a ${filename} file was not found.`)
+                if (! flags.force && ! await cli.confirm(`A ${filename} file was not found. Would you like to create a new one? Y/n`)) return this.error(`Initialization aborted as a ${filename} file was not found.`)
 
                 let template = ''
 
@@ -110,7 +108,11 @@ class Envault extends Command {
             let contents = (await fs.readFile(filename)).toString()
 
             for (const variable of variables) {
-                if (! (variable.key in localVariables) && ! flags.constructive && ! await cli.confirm(`The ${variable.key} variable is not currently present in your ${filename} file. Would you like to add it? Y/n`)) continue
+                if (! (variable.key in localVariables)) {
+                    if (! flags.constructive) continue
+
+                    if (! flags.force && ! await cli.confirm(`The ${variable.key} variable is not currently present in your ${filename} file. Would you like to add it? Y/n`)) continue
+                }
 
                 if (localVariables[variable.key] === parseValue(variable.latest_version.value)) continue
 
@@ -176,7 +178,7 @@ class Envault extends Command {
         try {
             await fs.readFile(filename)
         } catch (error) {
-            if (! flags.constructive && ! await cli.confirm(`A ${filename} file was not found. Would you like to create a new one? Y/n`)) return this.error(`Pull aborted as a ${filename} file was not found.`)
+            if (! flags.force && ! await cli.confirm(`A ${filename} file was not found. Would you like to create a new one? Y/n`)) return this.error(`Pull aborted as a ${filename} file was not found.`)
 
             let template = ''
 
@@ -194,7 +196,11 @@ class Envault extends Command {
         let contents = (await fs.readFile(filename)).toString()
 
         for (const variable of variables) {
-            if (! (variable.key in localVariables) && ! flags.constructive && ! await cli.confirm(`The ${variable.key} variable is not currently present in your ${filename} file. Would you like to add it? Y/n`)) continue
+            if (! (variable.key in localVariables)) {
+                if (! flags.constructive) continue
+
+                if (! flags.force && ! await cli.confirm(`The ${variable.key} variable is not currently present in your ${filename} file. Would you like to add it? Y/n`)) continue
+            }
 
             if (localVariables[variable.key] === parseValue(variable.latest_version.value)) continue
 
