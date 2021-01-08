@@ -76,18 +76,18 @@ class Envault extends Command {
 
             const variables: Array<Variable> = response.data.app.variables
 
+            let contents = ''
+
             try {
-                await fs.readFile(filename)
+                contents = (await fs.readFile(filename)).toString()
             } catch (error) {
                 if (! flags.force && ! await cli.confirm(`A ${filename} file was not found. Would you like to create a new one? Y/n`)) return this.error(`Initialization aborted as a ${filename} file was not found.`)
 
-                let template = ''
-
                 for (const variable of variables) {
-                    template += `${variable.key}=\n`
+                    contents += `${variable.key}=\n`
                 }
 
-                await fs.writeFile(filename, template)
+                await fs.writeFile(filename, contents)
             }
 
             await writeConfig({
@@ -104,8 +104,6 @@ class Envault extends Command {
             const localVariables = require('dotenv').config({ path: path.resolve(process.cwd(), filename) }).parsed
 
             let updates: Array<Variable> = []
-
-            let contents = (await fs.readFile(filename)).toString()
 
             for (const variable of variables) {
                 if (! (variable.key in localVariables)) {
@@ -175,25 +173,23 @@ class Envault extends Command {
 
         const variables: Array<Variable> = response.data.variables
 
+        let contents = ''
+
         try {
-            await fs.readFile(filename)
+            contents = (await fs.readFile(filename)).toString()
         } catch (error) {
             if (! flags.force && ! await cli.confirm(`A ${filename} file was not found. Would you like to create a new one? Y/n`)) return this.error(`Pull aborted as a ${filename} file was not found.`)
 
-            let template = ''
-
             for (const variable of variables) {
-                template += `${variable.key}=\n`
+                contents += `${variable.key}=\n`
             }
 
-            await fs.writeFile(filename, template)
+            await fs.writeFile(filename, contents)
         }
 
         const localVariables = require('dotenv').config({ path: path.resolve(process.cwd(), filename) }).parsed
 
         let updates: Array<Variable> = []
-
-        let contents = (await fs.readFile(filename)).toString()
 
         for (const variable of variables) {
             if (! (variable.key in localVariables)) {
