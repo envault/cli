@@ -152,7 +152,7 @@ class Envault extends Command {
 
         let authToken = config.authToken
         let environment = config.environment
-        let filename = flags.filename ?? config.filename
+        let filename = flags.filename ?? config.filename ?? '.env'
         let server = config.server
 
         cli.action.start('Connecting to your Envault server')
