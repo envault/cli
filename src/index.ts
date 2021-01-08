@@ -18,16 +18,18 @@ class Envault extends Command {
     static description = 'Sync your .env file with Envault.'
 
     static flags = {
+        constructive: flags.boolean({
+            char: 'c',
+            description: 'constructive mode: creates missing files and variables without prompt',
+        }),
         filename: flags.string({
             char: 'f',
-            default: '.env',
-            description: 'name of .env file'
+            description: 'name of .env file',
         }),
-        // force: flags.boolean({char: 'f'}),
         help: flags.help({char: 'h'}),
         // update: flags.boolean({
         //     char: 'u',
-        //     description: 'update Envault from the local .env'
+        //     description: 'update Envault from the local .env',
         // }),
         version: flags.version({char: 'v'}),
     }
@@ -50,12 +52,11 @@ class Envault extends Command {
     async run() {
         const {args, flags} = this.parse(Envault)
 
-        let filename = flags.filename
-
         this.log('Welcome to Envault! No more .env update nightmares from now on, we promise 🤗')
 
         if (args.server && args.environment && args.token) {
             let environment = args.environment
+            let filename = flags.filename ?? '.env'
             let server = args.server
             let token = args.token
 
@@ -80,7 +81,7 @@ class Envault extends Command {
             try {
                 await fs.readFile(filename)
             } catch (error) {
-                if (! await cli.confirm(`A ${filename} file was not found. Would you like to create a new one? Y/n`)) return this.error(`Initialization aborted as a ${filename} file was not found.`)
+                if (! flags.constructive && ! await cli.confirm(`A ${filename} file was not found. Would you like to create a new one? Y/n`)) return this.error(`Initialization aborted as a ${filename} file was not found.`)
 
                 let template = ''
 
@@ -109,7 +110,7 @@ class Envault extends Command {
             let contents = (await fs.readFile(filename)).toString()
 
             for (const variable of variables) {
-                if (! (variable.key in localVariables) && ! await cli.confirm(`The ${variable.key} variable is not currently present in your ${filename} file. Would you like to add it? Y/n`)) continue
+                if (! (variable.key in localVariables) && ! flags.constructive && ! await cli.confirm(`The ${variable.key} variable is not currently present in your ${filename} file. Would you like to add it? Y/n`)) continue
 
                 if (localVariables[variable.key] === parseValue(variable.latest_version.value)) continue
 
@@ -145,7 +146,86 @@ class Envault extends Command {
             return
         }
 
-        // pull
+        const config = await getConfig()
+
+        if (! config) this.error('Please initialize your Envault environment before trying to pull.')
+
+        let authToken = config.authToken
+        let environment = config.environment
+        let filename = flags.filename ?? config.filename
+        let server = config.server
+
+        cli.action.start('Connecting to your Envault server')
+
+        axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
+
+        let response
+
+        try {
+            response = await axios.post(`https://${server}/api/v1/apps/${environment}/update`)
+        } catch (error) {
+            this.error('There is an error with your Envault configuration, please set up your app again!')
+
+            return
+        }
+
+        cli.action.stop()
+
+        const variables: Array<Variable> = response.data.variables
+
+        try {
+            await fs.readFile(filename)
+        } catch (error) {
+            if (! flags.constructive && ! await cli.confirm(`A ${filename} file was not found. Would you like to create a new one? Y/n`)) return this.error(`Pull aborted as a ${filename} file was not found.`)
+
+            let template = ''
+
+            for (const variable of variables) {
+                template += `${variable.key}=\n`
+            }
+
+            await fs.writeFile(filename, template)
+        }
+
+        const localVariables = require('dotenv').config({ path: path.resolve(process.cwd(), filename) }).parsed
+
+        let updates: Array<Variable> = []
+
+        let contents = (await fs.readFile(filename)).toString()
+
+        for (const variable of variables) {
+            if (! (variable.key in localVariables) && ! flags.constructive && ! await cli.confirm(`The ${variable.key} variable is not currently present in your ${filename} file. Would you like to add it? Y/n`)) continue
+
+            if (localVariables[variable.key] === parseValue(variable.latest_version.value)) continue
+
+            let expression = new RegExp('^' + variable.key + '=.*', 'gm')
+
+            contents = contents.replace(expression, `${variable.key}=${variable.latest_version.value}`)
+
+            if (! contents.match(expression)) {
+                contents += `\n${variable.key}=${variable.latest_version.value}\n`
+            }
+
+            updates.push(variable)
+        }
+
+        await fs.writeFile(filename, contents)
+
+        if (updates.length) {
+            this.log(`We updated ${updates.length} ${updates.length > 1 ? 'variables' : 'variable'}:`)
+
+            let updatesTree = cli.tree()
+
+            for (const variable of updates) {
+                updatesTree.insert(`${variable.key} to v${variable.latest_version.id}`)
+            }
+
+            updatesTree.display()
+
+            return
+        }
+
+        this.log('You are already up to date 🎉')
     }
 }
 

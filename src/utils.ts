@@ -20,10 +20,12 @@ export async function getConfig() {
     let config
 
     try {
-        config = (await fs.readFile('.envault.json')).toJSON()
+        config = await fs.readFile('.envault.json')
     } catch (error) {
         return false
     }
+
+    config = JSON.parse(config)
 
     let fixed = false
 
