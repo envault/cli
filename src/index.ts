@@ -63,7 +63,7 @@ class Envault extends Command {
             let response
 
             try {
-                response = await axios.post(`https://${server}/api/v1/apps/${environment}/setup/${token}`)
+                response = await axios.post(`${server}/api/v1/apps/${environment}/setup/${token}`)
             } catch (error) {
                 this.error('Looks like your setup token is invalid, please get another!')
 
@@ -162,7 +162,7 @@ class Envault extends Command {
         let response
 
         try {
-            response = await axios.post(`https://${server}/api/v1/apps/${environment}/update`)
+            response = await axios.post(`${server}/api/v1/apps/${environment}/update`)
         } catch (error) {
             this.error('There is an error with your Envault configuration, please set up your app again!')
 
