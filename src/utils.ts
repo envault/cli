@@ -1,5 +1,12 @@
 const fs = require('fs').promises
 
+interface ConfigItem {
+    authToken: string
+    environment: string
+    filename: string
+    server: string
+}
+
 export async function addConfigToGitignore() {
     let contents
 
@@ -16,18 +23,36 @@ export async function addConfigToGitignore() {
     return true
 }
 
-export async function getConfig() {
-    let config
+export async function getConfig(server = null, environment = null) {
+    let configs
+    let fixed = false
 
     try {
-        config = await fs.readFile('.envault.json')
+        configs = await fs.readFile('.envault.json')
     } catch (error) {
         return false
     }
 
-    config = JSON.parse(config)
+    configs = JSON.parse(configs)
 
-    let fixed = false
+    if (! Array.isArray(configs)) {
+        configs = [configs];
+        fixed = true
+    }
+
+    let config = configs.find((item : ConfigItem) => {
+        return item.server === server && item.environment === environment
+    })
+
+    // If no config found
+    if (typeof config === 'undefined') {
+        // Default to first config if no server and environment provided
+        if (configs.length && ! server && ! environment) {
+            config = configs[0]
+        } else {
+            return
+        }
+    }
 
     if ('appId' in config) {
         config.environment = config.appId
@@ -70,8 +95,32 @@ export function parseValue(value = '') {
     return value
 }
 
-export async function writeConfig(contents: object) {
-    await fs.writeFile('.envault.json', JSON.stringify(contents))
+export async function writeConfig(contents: ConfigItem) {
+    let configs
+
+    try {
+        configs = await fs.readFile('.envault.json')
+    } catch (error) {
+        configs = JSON.stringify([]);
+    }
+
+    configs = JSON.parse(configs)
+
+    if (! Array.isArray(configs)) {
+        configs = [configs];
+    }
+
+    let configIndex = configs.findIndex((configItem: ConfigItem) => {
+        return configItem.server === contents.server && configItem.environment === contents.environment
+    })
+
+    if (configIndex === -1) {
+        configs.push(contents)
+    } else {
+        configs.splice(configIndex, 1, contents)
+    }
+
+    await fs.writeFile('.envault.json', JSON.stringify(configs))
 
     return contents
 }

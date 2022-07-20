@@ -146,7 +146,7 @@ class Envault extends Command {
             return
         }
 
-        const config = await getConfig()
+        const config = await getConfig(args.server, args.environment)
 
         if (! config) this.error('Please initialize your Envault environment before trying to pull.')
 
