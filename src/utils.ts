@@ -47,7 +47,7 @@ export async function getConfig(server = null, environment = null) {
     // If no config found
     if (typeof config === 'undefined') {
         // Default to first config if no server and environment provided
-        if (configs.length && ! server && ! environment) {
+        if ((configs.length) && (! server) && (! environment)) {
             config = configs[0]
         } else {
             return
